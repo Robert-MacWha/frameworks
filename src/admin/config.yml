@@ -10,7 +10,8 @@ collections:
     label: "Articles"
     folder: "/src"
     create: true
-    nested: true
+    nested:
+      depth: 100 # max depth to show in the collection tree
     slug: "{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }

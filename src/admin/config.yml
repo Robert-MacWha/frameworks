@@ -10,6 +10,7 @@ collections:
     label: "Articles"
     folder: "/src"
     create: true
+    nested: true
     slug: "{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }

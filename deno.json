@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "dev": "deno run --watch main.ts"
+  },
+  "imports": {
+    "netlify-cms-oauth-provider-node": "npm:netlify-cms-oauth-provider-node@^2.0.0"
+  }
+}

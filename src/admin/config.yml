@@ -5,7 +5,7 @@ backend:
   client_id: "Ov23li2PTQXAj14bAnKJ"
   scope: "repo"
   base_url: "https://frameworks-sage.vercel.app/"
-  auth_endpoint: auth
+  auth_endpoint: api/auth
   squash_merges: true
   open_authoring: true
   local_backend: true

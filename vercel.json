@@ -7,10 +7,5 @@
           "destination": "/",
           "permanent": true
         }
-      ],
-      "functions": {
-        "api/**/*": {
-          "runtime": "vercel-deno@3.1.0"
-        }
-      }
+      ]
   }

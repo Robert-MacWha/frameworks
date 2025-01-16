@@ -1,6 +1,7 @@
 backend:
   name: github
   squash_merges: true
+  repo: Robert-MacWha/frameworks
   branch: dev-decap-cms # Branch to update (optional; defaults to master)
   open_authoring: true
 

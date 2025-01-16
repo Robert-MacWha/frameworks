@@ -1,3 +1,8 @@
+---
+title: Test Title
+tags:
+  - Tag1
+---
 # Security Training
 
 tag: [Security Specialist, Operations & Strategy, HR]

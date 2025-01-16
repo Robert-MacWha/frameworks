@@ -1,6 +1,9 @@
-# Social Engineering
-
-tag: [Security Specialist, Operations & Strategy]
+---
+title: Social Engineering
+tags:
+  - Security Specialist
+  - Operations & Strategy
+---
 
 Social engineering is the use of deception to manipulate individuals into divulging confidential or personal information. This is one of the easiest and most effective ways to obtain access to your project.
 

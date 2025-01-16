@@ -5,7 +5,7 @@ backend:
   client_id: "Ov23li2PTQXAj14bAnKJ"
   scope: "repo"
   base_url: "https://frameworks-git-dev-decap-cms-robert-macwhas-projects.vercel.app/"
-  auth_endpoint: "auth"
+  auth_endpoint: "admin"
   squash_merges: true
   open_authoring: true
 

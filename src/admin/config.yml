@@ -1,8 +1,12 @@
 backend:
   name: github
-  squash_merges: true
   repo: robert-macwha/frameworks
-  branch: dev-decap-cms # Branch to update (optional; defaults to master)
+  branch: dev-decap-cms
+  client_id: "Ov23li2PTQXAj14bAnKJ"
+  scope: "repo"
+  base_url: "https://frameworks-git-dev-decap-cms-robert-macwhas-projects.vercel.app/"
+  auth_endpoint: "auth"
+  squash_merges: true
   open_authoring: true
 
 publish_mode: editorial_workflow

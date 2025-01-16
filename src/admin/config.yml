@@ -21,6 +21,9 @@ collections:
     create: true
     nested:
       depth: 100 # max depth to show in the collection tree
+      summary: "{{title}}"
     slug: "{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
+      - { label: "Tags", name: "tags", widget: "list" }
+      - { label: "Body", name: "body", widget: "markdown" }

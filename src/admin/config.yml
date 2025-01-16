@@ -4,9 +4,11 @@ backend:
   branch: dev-decap-cms
   client_id: "Ov23li2PTQXAj14bAnKJ"
   scope: "repo"
-  base_url: "https://netlify-cms.adrianub.vercel.app"
+  base_url: "https://frameworks-sage.vercel.app/"
+  auth_endpoint: auth
   squash_merges: true
   open_authoring: true
+  local_backend: true
 
 publish_mode: editorial_workflow
 media_folder: "static/images/uploads" # Media files will be stored in the repo under static/images/uploads

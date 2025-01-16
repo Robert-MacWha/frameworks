@@ -4,8 +4,7 @@ backend:
   branch: dev-decap-cms
   client_id: "Ov23li2PTQXAj14bAnKJ"
   scope: "repo"
-  base_url: "https://frameworks-git-dev-decap-cms-robert-macwhas-projects.vercel.app/"
-  auth_endpoint: "admin"
+  base_url: "https://netlify-cms.adrianub.vercel.app"
   squash_merges: true
   open_authoring: true
 

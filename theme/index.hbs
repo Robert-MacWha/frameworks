@@ -54,6 +54,22 @@
         {{/if}}
     </head>
     <body class="sidebar-visible no-js" data-page-title="{{ page.title }}">
+    
+    <!-- Netlify identity redirect -->
+    <!-- https://decapcms.org/docs/choosing-a-backend/ --> 
+    <script>
+    if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", (user) => {
+        if (!user) {
+            window.netlifyIdentity.on("login", () => {
+            document.location.href = "/admin/";
+            });
+        }
+        });
+    }
+    </script>
+
+
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>

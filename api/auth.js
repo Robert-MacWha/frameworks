@@ -1,4 +1,5 @@
 import { createVercelBeginHandler } from "netlify-cms-oauth-provider-node"
+import crypto from 'crypto';
 
 export default async function handler(req, res) {
     const state = crypto.randomBytes(8).toString('hex');

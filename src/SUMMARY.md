@@ -3,11 +3,7 @@ title: Summary
 ---
 # Security Frameworks by SEAL
 
-
-
-Summary Modification
-
-
+Summary Modification. Another modification
 
 * [Introduction to the Frameworks](./intro/introduction.md)
 * [What It Is](./intro/what-is-it.md)

@@ -1,54 +1,163 @@
-from transformers import pipeline
 import argparse
 import json
-import torch
 import re
+import os
+import dotenv
+import openai
 
-# roberta and bart don't seem to perform that well on zero-shot classification.
-# ChatGPT does a good job, so it's clearly just a scale issue, but I haven't
-# yet found a model that can be run locally and produces good results.
-#
-# Attempted so far: facebook/bart-large-mnli, roberta-large-mnli, mDeBERTa-v3-base-xnli-multilingual-nli-2mil7
-
+# Constants
 TAGS_FILE = "../../theme/tagscolors.json"
-SCORE_TRESHOLD = 0.6
+PROMPT_TAG_GENERATION = """
+Analyze the provided collection of articles and generate a list of recommended tags. The tags should be highly specific, 
+Zettelkasten-style, short, specific, and designed to create meaningful connections between articles. Each tag should also
+be applicable for a resonably percentage of articles. If all articles share the same tag, or if only a couple articles do, 
+they're unhelpful. Avoid generic tags and focus on distinct concepts, avoiding combining multiple concepts into a single tag.
 
-def get_tags():
-    with open(TAGS_FILE, 'r') as f:
-        raw = json.load(f)
-        return list(raw.keys())
+Tags should be a mix of broad concepts (IE Tooling, Metrics, Best Practices, Privacy) and specific topics (IE Incident Management, IAM, Encryption).
+
+# Steps
+1. Read and analyze all articles to identify key topics, themes, and concepts.
+2. Generate a list of recommended tags based on the collective content.
+3. Ensure tags are unique, relevant, and focused on clarity and linking articles.
+4. Avoid redundancy and over-tagging.
+
+Output a JSON list of unique tags in order of importance or relevance.
+"""
+
+PROMPT_TAG_APPLICATION = """
+Using the provided list of tags, analyze the article and assign the most relevant tags. Limit the number of tags to avoid over-tagging, with 1-3 tags for short articles and up to 5 for long articles.
+
+# Steps
+1. Analyze the article to extract its main topics, themes, and concepts.
+2. Compare the extracted themes to the provided list of tags.
+3. Select and apply the most relevant tags that capture the article's primary focus.
+
+Output a JSON object with the assigned tags.
+"""
+
+MAX_TAGS_PER_ARTICLE = 5
+
+
+# Helper Functions
+def sanitize_article(text: str) -> str:
+    """Sanitize an article by removing metadata and unnecessary text."""
+    text = re.sub(r"---.*?---", "", text, flags=re.DOTALL)  # Remove YAML metadata
+    text = re.sub(r"tags?: \[.*?\]\n", "", text)  # Remove inline tags
+    return text.strip()
+
+
+def load_articles(src_path: str) -> list[str]:
+    """Load all articles from the source path."""
+    articles = []
+    for root, _, filenames in os.walk(src_path):
+        for filename in filenames:
+            if not filename.endswith(".md"):
+                continue
+            with open(os.path.join(root, filename), "r") as f:
+                articles.append(sanitize_article(f.read()))
+
+    return articles
+
+
+def generate_tags(openai_client: openai.Client, articles: list[str]) -> list[str]:
+    """Generate a list of tags for the given collection of articles."""
+    combined_content = ""
+    for article in articles:
+        combined_content += f"```\n{article}\n```\n"
+
+    response = openai_client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": PROMPT_TAG_GENERATION},
+            {"role": "user", "content": combined_content},
+        ],
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "tags_list",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "tags": {
+                            "type": "array",
+                            "description": "A list of tags.",
+                            "items": {"type": "string"},
+                        }
+                    },
+                    "required": ["tags"],
+                    "additionalProperties": False,
+                },
+            },
+        },
+        temperature=0.7,
+        max_tokens=2048,
+    )
+    print(response)
+    try:
+        tags = json.loads(response["choices"][0]["message"]["content"])
+        return tags
+    except Exception as e:
+        print(f"Error generating tags: {e}")
+        return []
+
+
+def apply_tags(openai_client, articles, tags):
+    """Apply generated tags to individual articles."""
+    tagged_articles = []
+    for article in articles:
+        response = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": PROMPT_TAG_APPLICATION},
+                {
+                    "role": "user",
+                    "content": json.dumps({"article": article, "tags": tags}),
+                },
+            ],
+            temperature=0.7,
+            max_tokens=2048,
+        )
+        try:
+            result = json.loads(response["choices"][0]["message"]["content"])
+            tagged_articles.append({"article": article, "tags": result["tags"]})
+        except Exception as e:
+            print(f"Error applying tags to article: {e}")
+            tagged_articles.append({"article": article, "tags": []})
+    return tagged_articles
+
+
+def save_tags(tags: list[str], file_path: str):
+    """Save the generated tags to a JSON file."""
+    with open(file_path, "w") as f:
+        json.dump(tags, f, indent=2)
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Tagger")
-    parser.add_argument("file", type=str, help="Path to the file to be tagged")
+    dotenv.load_dotenv()
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    src_path = os.getenv("SRC_PATH", "src/")
 
-    args = parser.parse_args()
+    # Load articles
+    articles = load_articles(src_path)
 
-    file_content = ""
-    with open(args.file, 'r') as f:
-        file_content = f.read()
+    # Initialize OpenAI client
+    openai_client = openai.Client(api_key=openai_api_key)
 
-    # remove existing tags since it messes with the classifier
-    file_content = re.sub(r'^tag: \[.*\]\n?', '', file_content, flags=re.MULTILINE)
+    # Generate tags from all articles
+    tags = generate_tags(openai_client, articles)
+    print(f"Generated Tags: {tags}")
 
-    print("Loaded File")
+    # Save tags to a file
+    save_tags(tags, TAGS_FILE)
 
-    tags = get_tags()
-    print("Loaded Tags")
+    # Apply tags to individual articles
+    # tagged_articles = apply_tags(openai_client, articles, tags)
 
-    print("Parsing Keywords...")
-    device = 0 if torch.cuda.is_available() else -1
-    classifier = pipeline("zero-shot-classification", model="roberta-large-mnli", device=device)
-    result = classifier(file_content, tags, multi_label=True)
-    print("Parsed Keywords")
+    # # Output tagged articles
+    # for tagged in tagged_articles:
+    #     print(f"Article Tags: {tagged['tags']}")
 
-    scored_tags = list(zip(result['labels'], result['scores']))
-    scored_tags = sorted(scored_tags, key=lambda x: x[1])
-    # scored_tags = filter(lambda x: x[1] > SCORE_TRESHOLD, scored_tags)
-    for tag, score in scored_tags:
-        score = round(score, 2)
-        print(f"{tag}: {score}")
-            
 
 if __name__ == "__main__":
     main()

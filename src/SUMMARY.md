@@ -1,4 +1,7 @@
-# SUMMARY
+---
+title: Summary
+---
+
 # Security Frameworks by SEAL
 - [Introduction to the Frameworks](./intro/introduction.md)
 - [What It Is](./intro/what-is-it.md)

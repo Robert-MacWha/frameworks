@@ -18,14 +18,22 @@ function tagsGenerator(srcDir, outputDir) {
 
   function extractTags(content) {
     console.log("Extracting tags from content");
-    const tagRegex = /tag:\s*\[(.*?)\]/g;
-    const fileTags = [];
-    let match;
-    while ((match = tagRegex.exec(content)) !== null) {
-      fileTags.push(...match[1].split(",").map((tag) => tag.trim()));
+    const yamlRegex = /^---[\r\n]+([\s\S]*?)---[\r\n]/;
+    const match = content.match(yamlRegex);
+
+    if (!match) {
+      console.log("No YAML front matter found");
+      return [];
     }
-    console.log(`Extracted tags: ${fileTags.join(", ")}`);
-    return fileTags;
+
+    const yaml = match[1];
+    let tags = yaml.split("-");
+    for (let i = 0; i < tags.length; i++) {
+      tags[i] = tags[i].trim();
+    }
+
+    console.log(`Extracted tags: ${tags.join(", ")}`);
+    return tags;
   }
 
   function processFile(filePath) {

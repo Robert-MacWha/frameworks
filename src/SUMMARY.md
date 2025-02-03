@@ -140,6 +140,8 @@
   - [Security-Aware Culture](./user-team-security/security-aware-culture.md)
   - [Phishing and Social Engineering](./user-team-security/phishing-social-engineering.md)
 
+- [Graph](./graph/README.md)
+
 # Practical Guides
 <!-- - Step-by-step implementation — can be omitted
 - Case studies — an idea -->
